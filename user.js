@@ -3,7 +3,7 @@ const utils = require('utility');
 const Router = express.Router();
 const models = require('./model');
 const User = models.getModel('user');
-const _filter = { pwd: 0, '__v': 0 };
+const _filter = { pwd: 0, __v: 0 };
 
 Router.get('/list', (req, res) => {
   // User.remove({}, (req, res) => {});
@@ -31,11 +31,15 @@ Router.post('/register', (req, res) => {
     if (doc) {
       return res.json({ code: 1, msg: '用户名重复！' });
     }
-    User.create({ user, type, pwd: md5Pwd(pwd) }, (err, doc) => {
+
+    const userModel = new User({ user, type, pwd: md5Pwd(pwd) });
+    userModel.save((err, doc) => {
       if (err) {
         return res.json({ code: 1, msg: '出错了！' });
       }
-      return res.json({ code: 0 });
+      const { user, type, _id } = doc;
+      res.cookie('userid', _id);
+      return res.json({ code: 0, data: { user, type, _id } });
     });
   });
 });
