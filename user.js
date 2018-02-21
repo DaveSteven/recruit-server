@@ -3,13 +3,14 @@ const utils = require('utility');
 const Router = express.Router();
 const models = require('./model');
 const User = models.getModel('user');
+const Chat = models.getModel('chat');
 const _filter = { pwd: 0, __v: 0 };
 
 Router.get('/list', (req, res) => {
   // User.remove({}, (req, res) => {});
   const { type } = req.query;
   User.find({ type }, (err, doc) => {
-    return res.json({code: 0, data: doc});
+    return res.json({ code: 0, data: doc });
   });
 });
 
@@ -84,5 +85,27 @@ function md5Pwd(pwd) {
   const salt = 'imooc_is_good_312378Xd981Xaa!@#$!@';
   return utils.md5(`${pwd}${salt}`);
 }
+
+// 聊天接口
+Router.get('/getMsgList', (req, res) => {
+  // Chat.remove({}, (req, res) => {});
+  const userid = req.cookies.userid;
+  User.find({}, (err, userDoc) => {
+    if (userDoc) {
+      let users = {};
+      userDoc.forEach(item => {
+        users[item._id] = { name: item.user, avatar: item.avatar };
+      });
+      Chat.find({ $or: [{ from: userid }, { to: userid }] }, (err, doc) => {
+        if (err) {
+          return res.json({ code: 1, msg: '后端出错了' });
+        }
+        if (doc) {
+          return res.json({ code: 0, data: { msgList: doc, users } });
+        }
+      });
+    }
+  });
+});
 
 module.exports = Router;

@@ -19,7 +19,14 @@ const models = {
     company: { type: String },
     money: { type: String }
   },
-  chat: {}
+  chat: {
+    chatId: { type: String, require: true },
+    from: { type: String, require: true },
+    to: { type: String, require: true },
+    isRead: { type: Boolean, default: false },
+    content: { type: String, require: true },
+    createTime: { type: Number, default: +new Date() }
+  }
 };
 
 for(let m in models) {
